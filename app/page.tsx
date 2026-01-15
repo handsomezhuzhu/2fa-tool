@@ -500,7 +500,7 @@ export default function TwoFactorAuth() {
     <div className="min-h-screen bg-background flex flex-col">
       {/* Header */}
       <header className="border-b bg-card/50 backdrop-blur-sm sticky top-0 z-50">
-        <div className="container mx-auto px-4 py-4">
+        <div className="max-w-3xl mx-auto px-6 md:px-8 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center">
@@ -614,7 +614,7 @@ export default function TwoFactorAuth() {
       </header>
 
       {/* Main Content */}
-      <main className="flex-1 container mx-auto px-4 py-6">
+      <main className="flex-1 max-w-3xl mx-auto w-full px-6 md:px-8 py-6">
         {/* Timer Progress */}
         <div className="mb-6">
           <div className="flex items-center justify-between mb-2">
