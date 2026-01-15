@@ -108,6 +108,12 @@ const translations = {
     importedTokens: "个令牌",
     importFailed: "导入失败",
     invalidFormat: "无效的文件格式",
+    scanSuccess: "扫描成功",
+    qrCodeDetected: "已识别二维码，信息已自动填充",
+    scanFailed: "扫描失败",
+    noQrCodeFound: "未能在图片中识别到二维码",
+    invalidQrCode: "二维码不是有效的 TOTP 格式",
+    imageLoadFailed: "图片加载失败",
   },
   en: {
     // Header
@@ -211,6 +217,12 @@ const translations = {
     importedTokens: "tokens",
     importFailed: "Import failed",
     invalidFormat: "Invalid file format",
+    scanSuccess: "Scan successful",
+    qrCodeDetected: "QR code detected, info auto-filled",
+    scanFailed: "Scan failed",
+    noQrCodeFound: "Could not find QR code in image",
+    invalidQrCode: "QR code is not a valid TOTP format",
+    imageLoadFailed: "Failed to load image",
   },
 }
 

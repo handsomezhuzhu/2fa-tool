@@ -3,6 +3,7 @@
 import type React from "react"
 
 import { useState, useEffect, useRef, useCallback } from "react"
+import jsQR from "jsqr"
 import {
   Plus,
   Camera,
@@ -337,7 +338,7 @@ export default function TwoFactorAuth() {
     setIsCameraOpen(false)
   }
 
-  const scanQRCode = async () => {
+  const scanQRCode = () => {
     if (!videoRef.current || !canvasRef.current) return
 
     const video = videoRef.current
@@ -346,8 +347,8 @@ export default function TwoFactorAuth() {
 
     if (!ctx) return
 
-    const scan = async () => {
-      if (!isCameraOpen && !streamRef.current) return
+    const scan = () => {
+      if (!streamRef.current) return
 
       if (video.readyState === video.HAVE_ENOUGH_DATA) {
         canvas.width = video.videoWidth
@@ -355,9 +356,31 @@ export default function TwoFactorAuth() {
         ctx.drawImage(video, 0, 0, canvas.width, canvas.height)
 
         const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height)
+        const code = jsQR(imageData.data, imageData.width, imageData.height, {
+          inversionAttempts: "dontInvert",
+        })
 
-        // Simple QR detection - in production, use a library like jsQR
-        // For now, we'll rely on image upload for QR codes
+        if (code && code.data) {
+          // Found QR code
+          const parsed = parseOTPAuthURI(code.data)
+          if (parsed) {
+            stopCamera()
+            setNewToken({
+              name: parsed.name || "",
+              issuer: parsed.issuer || "",
+              secret: parsed.secret || "",
+              algorithm: parsed.algorithm || "SHA1",
+              digits: parsed.digits || 6,
+              period: parsed.period || 30,
+            })
+            setIsAddDialogOpen(true)
+            toast({
+              title: t.scanSuccess,
+              description: t.qrCodeDetected,
+            })
+            return
+          }
+        }
       }
 
       if (streamRef.current) {
@@ -365,7 +388,12 @@ export default function TwoFactorAuth() {
       }
     }
 
-    scan()
+    // Wait for video to be ready before scanning
+    if (video.readyState >= video.HAVE_ENOUGH_DATA) {
+      scan()
+    } else {
+      video.addEventListener("loadeddata", scan, { once: true })
+    }
   }
 
   // Handle image upload for QR scanning
@@ -375,7 +403,7 @@ export default function TwoFactorAuth() {
 
     const img = new Image()
     img.crossOrigin = "anonymous"
-    img.onload = async () => {
+    img.onload = () => {
       const canvas = document.createElement("canvas")
       canvas.width = img.width
       canvas.height = img.height
@@ -383,10 +411,47 @@ export default function TwoFactorAuth() {
       if (!ctx) return
 
       ctx.drawImage(img, 0, 0)
+      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height)
+      const code = jsQR(imageData.data, imageData.width, imageData.height, {
+        inversionAttempts: "attemptBoth",
+      })
 
+      if (code && code.data) {
+        const parsed = parseOTPAuthURI(code.data)
+        if (parsed) {
+          setNewToken({
+            name: parsed.name || "",
+            issuer: parsed.issuer || "",
+            secret: parsed.secret || "",
+            algorithm: parsed.algorithm || "SHA1",
+            digits: parsed.digits || 6,
+            period: parsed.period || 30,
+          })
+          setIsAddDialogOpen(true)
+          toast({
+            title: t.scanSuccess,
+            description: t.qrCodeDetected,
+          })
+        } else {
+          toast({
+            title: t.parseFailed,
+            description: t.invalidQrCode,
+            variant: "destructive",
+          })
+        }
+      } else {
+        toast({
+          title: t.scanFailed,
+          description: t.noQrCodeFound,
+          variant: "destructive",
+        })
+      }
+    }
+    img.onerror = () => {
       toast({
-        title: t.imageUploaded,
-        description: t.imageUploadedHint,
+        title: t.error,
+        description: t.imageLoadFailed,
+        variant: "destructive",
       })
     }
     img.src = URL.createObjectURL(file)
