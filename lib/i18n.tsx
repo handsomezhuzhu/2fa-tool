@@ -114,6 +114,8 @@ const translations = {
     noQrCodeFound: "未能在图片中识别到二维码",
     invalidQrCode: "二维码不是有效的 TOTP 格式",
     imageLoadFailed: "图片加载失败",
+    duplicateToken: "令牌已存在",
+    duplicateTokenDesc: "该密钥的令牌已添加过",
   },
   en: {
     // Header
@@ -223,6 +225,8 @@ const translations = {
     noQrCodeFound: "Could not find QR code in image",
     invalidQrCode: "QR code is not a valid TOTP format",
     imageLoadFailed: "Failed to load image",
+    duplicateToken: "Token already exists",
+    duplicateTokenDesc: "A token with this secret key has already been added",
   },
 }
 

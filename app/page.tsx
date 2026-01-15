@@ -31,7 +31,7 @@ import {
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent } from "@/components/ui/card"
 import {
   Dialog,
   DialogContent,
@@ -45,7 +45,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Switch } from "@/components/ui/switch"
-import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
 import { Toaster } from "@/components/ui/toaster"
 import { useToast } from "@/hooks/use-toast"
@@ -66,7 +65,6 @@ interface TOTPToken {
 interface AppSettings {
   showCodes: boolean
   autoRefresh: boolean
-  compactMode: boolean
   sortBy: "name" | "issuer" | "recent"
 }
 
@@ -184,7 +182,6 @@ export default function TwoFactorAuth() {
   const [settings, setSettings] = useState<AppSettings>({
     showCodes: true,
     autoRefresh: true,
-    compactMode: false,
     sortBy: "name",
   })
 
@@ -252,6 +249,16 @@ export default function TwoFactorAuth() {
 
     const cleanSecret = newToken.secret.replace(/\s/g, "").toUpperCase()
 
+    const isDuplicate = tokens.some((token) => token.secret === cleanSecret)
+    if (isDuplicate) {
+      toast({
+        title: t.duplicateToken,
+        description: t.duplicateTokenDesc,
+        variant: "destructive",
+      })
+      return
+    }
+
     const token: TOTPToken = {
       id: crypto.randomUUID(),
       name: newToken.name,
@@ -279,6 +286,65 @@ export default function TwoFactorAuth() {
       title: t.addSuccess,
       description: `${t.added} ${token.name}`,
     })
+  }
+
+  const addTokenDirectly = (parsed: {
+    name?: string
+    issuer?: string
+    secret?: string
+    algorithm?: string
+    digits?: number
+    period?: number
+  }) => {
+    if (!parsed.name || !parsed.secret) {
+      toast({
+        title: t.error,
+        description: t.fillRequired,
+        variant: "destructive",
+      })
+      return false
+    }
+
+    const cleanSecret = parsed.secret.replace(/\s/g, "").toUpperCase()
+
+    const isDuplicate = tokens.some((token) => token.secret === cleanSecret)
+    if (isDuplicate) {
+      toast({
+        title: t.duplicateToken,
+        description: t.duplicateTokenDesc,
+        variant: "destructive",
+      })
+      return false
+    }
+
+    const token: TOTPToken = {
+      id: crypto.randomUUID(),
+      name: parsed.name,
+      issuer: parsed.issuer || "",
+      secret: cleanSecret,
+      algorithm: (parsed.algorithm as "SHA1" | "SHA256" | "SHA512") || "SHA1",
+      digits: parsed.digits || 6,
+      period: parsed.period || 30,
+      createdAt: Date.now(),
+    }
+
+    setTokens((prev) => [...prev, token])
+    setNewToken({
+      name: "",
+      issuer: "",
+      secret: "",
+      algorithm: "SHA1",
+      digits: 6,
+      period: 30,
+    })
+    setShowAdvanced(false)
+    setIsAddDialogOpen(false)
+
+    toast({
+      title: t.addSuccess,
+      description: `${t.added} ${token.name}`,
+    })
+    return true
   }
 
   const deleteToken = (id: string) => {
@@ -400,19 +466,7 @@ export default function TwoFactorAuth() {
           const parsed = parseOTPAuthURI(code.data)
           if (parsed) {
             stopCamera()
-            setNewToken({
-              name: parsed.name || "",
-              issuer: parsed.issuer || "",
-              secret: parsed.secret || "",
-              algorithm: parsed.algorithm || "SHA1",
-              digits: parsed.digits || 6,
-              period: parsed.period || 30,
-            })
-            setIsAddDialogOpen(true)
-            toast({
-              title: t.scanSuccess,
-              description: t.qrCodeDetected,
-            })
+            addTokenDirectly(parsed)
             return
           }
         }
@@ -454,46 +508,27 @@ export default function TwoFactorAuth() {
       if (code && code.data) {
         const parsed = parseOTPAuthURI(code.data)
         if (parsed) {
-          setNewToken({
-            name: parsed.name || "",
-            issuer: parsed.issuer || "",
-            secret: parsed.secret || "",
-            algorithm: parsed.algorithm || "SHA1",
-            digits: parsed.digits || 6,
-            period: parsed.period || 30,
-          })
-          setIsAddDialogOpen(true)
-          toast({
-            title: t.scanSuccess,
-            description: t.qrCodeDetected,
-          })
+          addTokenDirectly(parsed)
         } else {
           toast({
-            title: t.parseFailed,
-            description: t.invalidQrCode,
+            title: t.scanFailed,
+            description: t.invalidQRCode,
             variant: "destructive",
           })
         }
       } else {
         toast({
           title: t.scanFailed,
-          description: t.noQrCodeFound,
+          description: t.noQRCodeFound,
           variant: "destructive",
         })
       }
     }
-    img.onerror = () => {
-      toast({
-        title: t.error,
-        description: t.imageLoadFailed,
-        variant: "destructive",
-      })
-    }
     img.src = URL.createObjectURL(file)
 
     // Reset file input
-    if (fileInputRef.current) {
-      fileInputRef.current.value = ""
+    if (event.target) {
+      event.target.value = ""
     }
   }
 
@@ -667,16 +702,6 @@ export default function TwoFactorAuth() {
                       <Switch
                         checked={settings.showCodes}
                         onCheckedChange={(checked) => setSettings({ ...settings, showCodes: checked })}
-                      />
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <Label>{t.compactMode}</Label>
-                        <p className="text-sm text-muted-foreground">{t.compactModeDesc}</p>
-                      </div>
-                      <Switch
-                        checked={settings.compactMode}
-                        onCheckedChange={(checked) => setSettings({ ...settings, compactMode: checked })}
                       />
                     </div>
                     <div className="space-y-2">
@@ -948,9 +973,8 @@ export default function TwoFactorAuth() {
             </CardContent>
           </Card>
         ) : (
-          <div
-            className={`grid gap-4 ${settings.compactMode ? "grid-cols-1" : "grid-cols-1 md:grid-cols-2 lg:grid-cols-3"}`}
-          >
+          // Update grid layout - always use single column
+          <div className="grid gap-3 grid-cols-1">
             {filteredTokens.map((token) => (
               <TokenCard
                 key={token.id}
@@ -958,12 +982,12 @@ export default function TwoFactorAuth() {
                 code={codes[token.id] || "------"}
                 timeLeft={timeLeft}
                 showCode={settings.showCodes}
-                compact={settings.compactMode}
+                // Remove compactMode prop
                 onCopy={() => copyCode(codes[token.id], token.name)}
                 onEdit={() => setEditingToken(token)}
                 onDelete={() => deleteToken(token.id)}
                 t={t}
-                language={language} // Pass language prop to TokenCard
+                language={language}
               />
             ))}
           </div>
@@ -1048,26 +1072,14 @@ interface TokenCardProps {
   code: string
   timeLeft: number
   showCode: boolean
-  compact: boolean
   onCopy: () => void
   onEdit: () => void
   onDelete: () => void
   t: Record<string, string>
-  language: string // Added language prop
+  language: string
 }
 
-function TokenCard({
-  token,
-  code,
-  timeLeft,
-  showCode,
-  compact,
-  onCopy,
-  onEdit,
-  onDelete,
-  t,
-  language,
-}: TokenCardProps) {
+function TokenCard({ token, code, timeLeft, showCode, onCopy, onEdit, onDelete, t, language }: TokenCardProps) {
   const [visible, setVisible] = useState(showCode)
   const [copied, setCopied] = useState(false)
 
@@ -1088,139 +1100,77 @@ function TokenCard({
         ? `${code.slice(0, 4)} ${code.slice(4)}`
         : code
 
-  if (compact) {
-    return (
-      <Card className="hover:shadow-md transition-shadow">
-        <CardContent className="py-3 px-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-                <span className="text-sm font-bold text-primary">{token.name.charAt(0).toUpperCase()}</span>
-              </div>
-              <div>
-                <p className="font-medium text-sm">{token.name}</p>
-                {token.issuer && <p className="text-xs text-muted-foreground">{token.issuer}</p>}
-              </div>
-            </div>
-            <div className="flex items-center gap-2">
-              <button onClick={() => setVisible(!visible)} className="p-1 hover:bg-muted rounded">
-                {visible ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
-              </button>
-              <span
-                className={`font-mono text-lg font-bold cursor-pointer transition-colors ${
-                  copied ? "text-green-500" : ""
-                }`}
-                onClick={handleCopy}
-              >
-                {copied ? (language === "zh" ? "已复制!" : "Copied!") : formattedCode}
-              </span>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="icon" className="h-8 w-8">
-                    <MoreVertical className="h-4 w-4" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuItem onClick={handleCopy}>
-                    {copied ? <Check className="h-4 w-4 mr-2 text-green-500" /> : <Copy className="h-4 w-4 mr-2" />}
-                    {t.copy}
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={onEdit}>
-                    <Edit2 className="h-4 w-4 mr-2" />
-                    {t.edit}
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={onDelete} className="text-destructive">
-                    <Trash2 className="h-4 w-4 mr-2" />
-                    {t.delete}
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-    )
-  }
-
   return (
     <Card className="hover:shadow-md transition-shadow">
-      <CardHeader className="pb-2">
-        <div className="flex items-start justify-between">
-          <div className="flex items-center gap-3">
-            <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center">
-              <span className="text-lg font-bold text-primary">{token.name.charAt(0).toUpperCase()}</span>
+      <CardContent className="py-3 px-4">
+        <div className="flex items-center justify-between gap-2">
+          {/* Left: Avatar and name - with truncation */}
+          <div className="flex items-center gap-3 min-w-0 flex-1">
+            <div className="h-9 w-9 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+              <span className="text-sm font-bold text-primary">{token.name.charAt(0).toUpperCase()}</span>
             </div>
-            <div>
-              <CardTitle className="text-base">{token.name}</CardTitle>
-              {token.issuer && <CardDescription>{token.issuer}</CardDescription>}
+            <div className="min-w-0 flex-1">
+              <p className="font-medium text-sm truncate" title={token.name}>
+                {token.name}
+              </p>
+              {token.issuer && (
+                <p className="text-xs text-muted-foreground truncate" title={token.issuer}>
+                  {token.issuer}
+                </p>
+              )}
             </div>
           </div>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-8 w-8">
-                <MoreVertical className="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={handleCopy}>
-                {copied ? <Check className="h-4 w-4 mr-2 text-green-500" /> : <Copy className="h-4 w-4 mr-2" />}
-                {t.copyCode}
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={onEdit}>
-                <Edit2 className="h-4 w-4 mr-2" />
-                {t.edit}
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={onDelete} className="text-destructive">
-                <Trash2 className="h-4 w-4 mr-2" />
-                {t.delete}
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-      </CardHeader>
-      <CardContent>
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <button onClick={() => setVisible(!visible)} className="p-1 hover:bg-muted rounded transition-colors">
-              {visible ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
+
+          {/* Right: Code and actions - fixed width */}
+          <div className="flex items-center gap-1 shrink-0">
+            <button
+              onClick={() => setVisible(!visible)}
+              className="p-1.5 hover:bg-muted rounded-md transition-colors"
+              title={visible ? t.hideCode : t.showCode}
+            >
+              {visible ? (
+                <Eye className="h-4 w-4 text-muted-foreground" />
+              ) : (
+                <EyeOff className="h-4 w-4 text-muted-foreground" />
+              )}
             </button>
+
             <span
-              className={`font-mono text-2xl font-bold tracking-wider cursor-pointer transition-colors ${
+              className={`font-mono text-base font-bold min-w-[90px] text-center transition-colors ${
                 copied ? "text-green-500" : ""
               }`}
-              onClick={handleCopy}
             >
-              {copied ? (language === "zh" ? "已复制!" : "Copied!") : formattedCode}
+              {visible ? formattedCode : "••• •••"}
             </span>
+
+            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={handleCopy} title={t.copy}>
+              {copied ? (
+                <Check className="h-4 w-4 text-green-500" />
+              ) : (
+                <Copy className="h-4 w-4 text-muted-foreground" />
+              )}
+            </Button>
+
+            {/* More actions dropdown */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon" className="h-8 w-8">
+                  <MoreVertical className="h-4 w-4 text-muted-foreground" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={onEdit}>
+                  <Edit2 className="h-4 w-4 mr-2" />
+                  {t.edit}
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={onDelete} className="text-destructive">
+                  <Trash2 className="h-4 w-4 mr-2" />
+                  {t.delete}
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
-          <Button variant="ghost" size="icon" onClick={handleCopy} className={copied ? "text-green-500" : ""}>
-            {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
-          </Button>
         </div>
-        <div className="mt-3 flex items-center gap-2">
-          <Progress value={(timeLeft / token.period) * 100} className="h-1 flex-1" />
-          <span className="text-xs text-muted-foreground w-6">{timeLeft}s</span>
-        </div>
-        {(token.algorithm !== "SHA1" || token.digits !== 6 || token.period !== 30) && (
-          <div className="mt-2 flex gap-1 flex-wrap">
-            {token.algorithm !== "SHA1" && (
-              <Badge variant="secondary" className="text-xs">
-                {token.algorithm}
-              </Badge>
-            )}
-            {token.digits !== 6 && (
-              <Badge variant="secondary" className="text-xs">
-                {token.digits}
-                {t.digits8?.includes("digits") ? " digits" : "位"}
-              </Badge>
-            )}
-            {token.period !== 30 && (
-              <Badge variant="secondary" className="text-xs">
-                {token.period}s
-              </Badge>
-            )}
-          </div>
-        )}
       </CardContent>
     </Card>
   )
