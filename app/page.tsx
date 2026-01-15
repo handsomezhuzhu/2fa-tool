@@ -316,22 +316,43 @@ export default function TwoFactorAuth() {
       })
       streamRef.current = stream
 
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream
-        // Wait for video to be ready before playing
-        await new Promise<void>((resolve, reject) => {
-          const video = videoRef.current!
-          video.onloadedmetadata = () => {
-            video
-              .play()
-              .then(() => resolve())
-              .catch(reject)
+      setIsCameraOpen(true)
+
+      // Wait for the video element to mount before attaching the stream
+      await new Promise<void>((resolve, reject) => {
+        let attempts = 0
+        const waitForVideo = () => {
+          if (videoRef.current) {
+            resolve()
+            return
           }
-          video.onerror = () => reject(new Error("Video load error"))
-        })
+          attempts += 1
+          if (attempts > 10) {
+            reject(new Error("Video element not available"))
+            return
+          }
+          requestAnimationFrame(waitForVideo)
+        }
+        waitForVideo()
+      })
+
+      if (!videoRef.current) {
+        throw new Error("Video element not available")
       }
 
-      setIsCameraOpen(true)
+      videoRef.current.srcObject = stream
+      // Wait for video to be ready before playing
+      await new Promise<void>((resolve, reject) => {
+        const video = videoRef.current!
+        video.onloadedmetadata = () => {
+          video
+            .play()
+            .then(() => resolve())
+            .catch(reject)
+        }
+        video.onerror = () => reject(new Error("Video load error"))
+      })
+
       // Start scanning after a short delay to ensure video is rendering
       setTimeout(() => scanQRCode(), 500)
     } catch (error) {
