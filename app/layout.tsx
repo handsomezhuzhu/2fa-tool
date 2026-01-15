@@ -27,7 +27,13 @@ export default function RootLayout({
   return (
     <html lang="zh-CN" suppressHydrationWarning>
       <body className={`font-sans antialiased`}>
-        <ThemeProvider defaultTheme="system" storageKey="2fa-theme">
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+          storageKey="2fa-theme"
+        >
           <LanguageProvider>{children}</LanguageProvider>
         </ThemeProvider>
         <Analytics />
