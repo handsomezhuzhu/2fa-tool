@@ -315,13 +315,27 @@ export default function TwoFactorAuth() {
         video: { facingMode: "environment" },
       })
       streamRef.current = stream
+
       if (videoRef.current) {
         videoRef.current.srcObject = stream
-        videoRef.current.play()
+        // Wait for video to be ready before playing
+        await new Promise<void>((resolve, reject) => {
+          const video = videoRef.current!
+          video.onloadedmetadata = () => {
+            video
+              .play()
+              .then(() => resolve())
+              .catch(reject)
+          }
+          video.onerror = () => reject(new Error("Video load error"))
+        })
       }
+
       setIsCameraOpen(true)
-      scanQRCode()
+      // Start scanning after a short delay to ensure video is rendering
+      setTimeout(() => scanQRCode(), 500)
     } catch (error) {
+      console.log("[v0] Camera error:", error)
       toast({
         title: t.cameraFailed,
         description: t.cameraPermission,
@@ -561,6 +575,14 @@ export default function TwoFactorAuth() {
     }
   }
 
+  const handleAddDialogChange = (open: boolean) => {
+    if (!open) {
+      // Stop camera when dialog is closed
+      stopCamera()
+    }
+    setIsAddDialogOpen(open)
+  }
+
   return (
     <div className="min-h-screen bg-background flex flex-col">
       {/* Header */}
@@ -704,7 +726,7 @@ export default function TwoFactorAuth() {
             />
           </div>
           <div className="flex gap-2">
-            <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+            <Dialog open={isAddDialogOpen} onOpenChange={handleAddDialogChange}>
               <DialogTrigger asChild>
                 <Button>
                   <Plus className="h-4 w-4 mr-2" />
@@ -839,7 +861,7 @@ export default function TwoFactorAuth() {
                         </div>
                       ) : (
                         <div className="relative aspect-video bg-black rounded-lg overflow-hidden">
-                          <video ref={videoRef} className="w-full h-full object-cover" playsInline />
+                          <video ref={videoRef} className="w-full h-full object-cover" playsInline autoPlay muted />
                           <canvas ref={canvasRef} className="hidden" />
                           <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                             <div className="w-48 h-48 border-2 border-white/50 rounded-lg" />
