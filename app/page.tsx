@@ -25,6 +25,7 @@ import {
   Moon,
   Monitor,
   Languages,
+  Check,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -855,6 +856,7 @@ export default function TwoFactorAuth() {
                 onEdit={() => setEditingToken(token)}
                 onDelete={() => deleteToken(token.id)}
                 t={t}
+                language={language} // Pass language prop to TokenCard
               />
             ))}
           </div>
@@ -944,14 +946,33 @@ interface TokenCardProps {
   onEdit: () => void
   onDelete: () => void
   t: Record<string, string>
+  language: string // Added language prop
 }
 
-function TokenCard({ token, code, timeLeft, showCode, compact, onCopy, onEdit, onDelete, t }: TokenCardProps) {
+function TokenCard({
+  token,
+  code,
+  timeLeft,
+  showCode,
+  compact,
+  onCopy,
+  onEdit,
+  onDelete,
+  t,
+  language,
+}: TokenCardProps) {
   const [visible, setVisible] = useState(showCode)
+  const [copied, setCopied] = useState(false)
 
   useEffect(() => {
     setVisible(showCode)
   }, [showCode])
+
+  const handleCopy = () => {
+    onCopy()
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
+  }
 
   const formattedCode =
     code.length === 6
@@ -979,10 +1000,12 @@ function TokenCard({ token, code, timeLeft, showCode, compact, onCopy, onEdit, o
                 {visible ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
               </button>
               <span
-                className={`font-mono text-lg font-bold cursor-pointer ${timeLeft <= 5 ? "text-destructive" : ""}`}
-                onClick={onCopy}
+                className={`font-mono text-lg font-bold cursor-pointer transition-colors ${
+                  copied ? "text-green-500" : ""
+                }`}
+                onClick={handleCopy}
               >
-                {visible ? formattedCode : "••• •••"}
+                {copied ? (language === "zh" ? "已复制!" : "Copied!") : formattedCode}
               </span>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -991,8 +1014,8 @@ function TokenCard({ token, code, timeLeft, showCode, compact, onCopy, onEdit, o
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
-                  <DropdownMenuItem onClick={onCopy}>
-                    <Copy className="h-4 w-4 mr-2" />
+                  <DropdownMenuItem onClick={handleCopy}>
+                    {copied ? <Check className="h-4 w-4 mr-2 text-green-500" /> : <Copy className="h-4 w-4 mr-2" />}
                     {t.copy}
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={onEdit}>
@@ -1032,8 +1055,8 @@ function TokenCard({ token, code, timeLeft, showCode, compact, onCopy, onEdit, o
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={onCopy}>
-                <Copy className="h-4 w-4 mr-2" />
+              <DropdownMenuItem onClick={handleCopy}>
+                {copied ? <Check className="h-4 w-4 mr-2 text-green-500" /> : <Copy className="h-4 w-4 mr-2" />}
                 {t.copyCode}
               </DropdownMenuItem>
               <DropdownMenuItem onClick={onEdit}>
@@ -1055,16 +1078,16 @@ function TokenCard({ token, code, timeLeft, showCode, compact, onCopy, onEdit, o
               {visible ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
             </button>
             <span
-              className={`font-mono text-2xl font-bold tracking-wider cursor-pointer ${
-                timeLeft <= 5 ? "text-destructive animate-pulse" : ""
+              className={`font-mono text-2xl font-bold tracking-wider cursor-pointer transition-colors ${
+                copied ? "text-green-500" : ""
               }`}
-              onClick={onCopy}
+              onClick={handleCopy}
             >
-              {visible ? formattedCode : "••• •••"}
+              {copied ? (language === "zh" ? "已复制!" : "Copied!") : formattedCode}
             </span>
           </div>
-          <Button variant="ghost" size="icon" onClick={onCopy}>
-            <Copy className="h-4 w-4" />
+          <Button variant="ghost" size="icon" onClick={handleCopy} className={copied ? "text-green-500" : ""}>
+            {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
           </Button>
         </div>
         <div className="mt-3 flex items-center gap-2">
