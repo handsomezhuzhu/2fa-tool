@@ -1,30 +1,51 @@
-# Frontend 2FA tool
+# Frontend 2FA Tool
 
-*Automatically synced with your [v0.app](https://v0.app) deployments*
+这是一个安全、离线优先的前端双因素认证 (2FA) 工具，基于 Next.js 构建。
 
-[![Deployed on Vercel](https://img.shields.io/badge/Deployed%20on-Vercel-black?style=for-the-badge&logo=vercel)](https://vercel.com/kdaugh14-4907s-projects/v0-frontend-2-fa-tool)
-[![Built with v0](https://img.shields.io/badge/Built%20with-v0.app-black?style=for-the-badge)](https://v0.app/chat/cHtdgE8H6EW)
+## 功能特性
 
-## Overview
+- 🔒 **安全**: 所有数据存储在本地，不上传服务器
+- 📱 **QR 扫码**: 支持直接扫描 QR 码添加令牌 (使用 jsQR)
+- ⌨️ **手动录入**: 支持手动输入密钥添加
+- 🌓 **深色模式**: 内置明亮/深色主题切换
+- 📤 **导入/导出**: 支持令牌数据的备份与恢复
+- 🌐 **多语言**: 支持国际化
 
-This repository will stay in sync with your deployed chats on [v0.app](https://v0.app).
-Any changes you make to your deployed app will be automatically pushed to this repository from [v0.app](https://v0.app).
+## 技术栈
 
-## Deployment
+- **框架**: Next.js 14
+- **UI 组件**: Radix UI
+- **样式**: Tailwind CSS
+- **工具库**: jsQR, date-fns
 
-Your project is live at:
+## 声明
 
-**[https://vercel.com/kdaugh14-4907s-projects/v0-frontend-2-fa-tool](https://vercel.com/kdaugh14-4907s-projects/v0-frontend-2-fa-tool)**
+本项目由阿里云ESA提供加速、计算和保护
 
-## Build your app
+![阿里云ESA Pages](public/images/aliyun-esa.png)
 
-Continue building your app on:
+## 开始使用
 
-**[https://v0.app/chat/cHtdgE8H6EW](https://v0.app/chat/cHtdgE8H6EW)**
+1. 安装依赖:
 
-## How It Works
+```bash
+pnpm install
+```
 
-1. Create and modify your project using [v0.app](https://v0.app)
-2. Deploy your chats from the v0 interface
-3. Changes are automatically pushed to this repository
-4. Vercel deploys the latest version from this repository
+2. 启动开发服务器:
+
+```bash
+pnpm dev
+```
+
+3. 访问 [http://localhost:3000](http://localhost:3000)
+
+## 构建
+
+```bash
+pnpm build
+```
+
+## 部署
+
+本项目可以直接部署在阿里云 ESA Pages 上。
