@@ -27,6 +27,7 @@ import {
   Monitor,
   Languages,
   Check,
+  Github,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -162,6 +163,7 @@ export default function TwoFactorAuth() {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false)
   const [editingToken, setEditingToken] = useState<TOTPToken | null>(null)
   const [showAdvanced, setShowAdvanced] = useState(false)
+  const [mounted, setMounted] = useState(false)
   const videoRef = useRef<HTMLVideoElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -195,6 +197,7 @@ export default function TwoFactorAuth() {
     if (savedSettings) {
       setSettings(JSON.parse(savedSettings))
     }
+    setMounted(true)
   }, [])
 
   // Save tokens to localStorage
@@ -655,15 +658,33 @@ export default function TwoFactorAuth() {
               </div>
             </div>
             <div className="flex items-center gap-2">
+              <Button variant="ghost" size="icon" asChild>
+                <a
+                  href="https://github.com/handsomezhuzhu/2fa-tool"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  title="GitHub"
+                >
+                  <Github className="h-5 w-5" />
+                  <span className="sr-only">GitHub</span>
+                </a>
+              </Button>
+
               <Button
                 variant="ghost"
                 size="icon"
                 onClick={cycleTheme}
-                title={theme === "light" ? t.themeLight : theme === "dark" ? t.themeDark : t.themeSystem}
+                title={mounted ? (theme === "light" ? t.themeLight : theme === "dark" ? t.themeDark : t.themeSystem) : t.themeSystem}
               >
-                {theme === "light" && <Sun className="h-5 w-5" />}
-                {theme === "dark" && <Moon className="h-5 w-5" />}
-                {theme === "system" && <Monitor className="h-5 w-5" />}
+                {!mounted ? (
+                  <Monitor className="h-5 w-5" />
+                ) : (
+                  <>
+                    {theme === "light" && <Sun className="h-5 w-5" />}
+                    {theme === "dark" && <Moon className="h-5 w-5" />}
+                    {theme === "system" && <Monitor className="h-5 w-5" />}
+                  </>
+                )}
                 <span className="sr-only">Toggle theme</span>
               </Button>
 
@@ -1028,39 +1049,50 @@ export default function TwoFactorAuth() {
       </Dialog>
 
       {/* Footer */}
-      <footer className="border-t py-6 mt-auto">
-        <div className="mx-auto flex max-w-4xl flex-col items-center gap-2 text-center md:flex-row md:justify-between md:gap-4 px-4">
-          <p className="text-xs tracking-wider text-muted-foreground">© 2025 Simon. All rights reserved.</p>
-          <div className="flex items-center gap-4 text-xs tracking-wider text-muted-foreground/60">
-            <a
-              href="https://beian.miit.gov.cn/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="transition-colors hover:text-muted-foreground"
-            >
-              滇ICP备2025074424号
-            </a>
-            <span className="text-muted-foreground/30">|</span>
-            <a
-              href="https://beian.mps.gov.cn"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-1.5 transition-colors hover:text-muted-foreground"
-            >
-              <img
-                alt="公安备案"
-                loading="lazy"
-                width="14"
-                height="14"
-                decoding="async"
-                className="opacity-60"
-                src="/images/beian.png"
-              />
-              滇公网安备53250402000233号
-            </a>
+      {/* Footer */}
+      {(process.env.NEXT_PUBLIC_SHOW_FOOTER !== "false") && (
+        <footer className="border-t py-6 mt-auto">
+          <div className="mx-auto flex max-w-4xl flex-col items-center gap-2 text-center md:flex-row md:justify-between md:gap-4 px-4">
+            <p className="text-xs tracking-wider text-muted-foreground">© 2025 Simon. All rights reserved.</p>
+            {(process.env.NEXT_PUBLIC_FILING_ICP || process.env.NEXT_PUBLIC_FILING_SECURITY) && (
+              <div className="flex items-center gap-4 text-xs tracking-wider text-muted-foreground/60">
+                {process.env.NEXT_PUBLIC_FILING_ICP && (
+                  <a
+                    href="https://beian.miit.gov.cn/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="transition-colors hover:text-muted-foreground"
+                  >
+                    {process.env.NEXT_PUBLIC_FILING_ICP}
+                  </a>
+                )}
+                {process.env.NEXT_PUBLIC_FILING_ICP && process.env.NEXT_PUBLIC_FILING_SECURITY && (
+                  <span className="text-muted-foreground/30">|</span>
+                )}
+                {process.env.NEXT_PUBLIC_FILING_SECURITY && (
+                  <a
+                    href="https://beian.mps.gov.cn"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-1.5 transition-colors hover:text-muted-foreground"
+                  >
+                    <img
+                      alt="公安备案"
+                      loading="lazy"
+                      width="14"
+                      height="14"
+                      decoding="async"
+                      className="opacity-60"
+                      src="/images/beian.png"
+                    />
+                    {process.env.NEXT_PUBLIC_FILING_SECURITY}
+                  </a>
+                )}
+              </div>
+            )}
           </div>
-        </div>
-      </footer>
+        </footer>
+      )}
 
       <Toaster />
     </div>
@@ -1136,9 +1168,8 @@ function TokenCard({ token, code, timeLeft, showCode, onCopy, onEdit, onDelete, 
             </button>
 
             <span
-              className={`font-mono text-base font-bold min-w-[90px] text-center transition-colors ${
-                copied ? "text-green-500" : ""
-              }`}
+              className={`font-mono text-base font-bold min-w-[90px] text-center transition-colors ${copied ? "text-green-500" : ""
+                }`}
             >
               {visible ? formattedCode : "••• •••"}
             </span>

@@ -18,6 +18,14 @@
 - **样式**: Tailwind CSS
 - **工具库**: jsQR, date-fns
 
+## 环境变量
+
+可以在部署时设置以下环境变量来配置页脚信息：
+
+- `NEXT_PUBLIC_SHOW_FOOTER`: 是否显示页脚 (默认: true, 设置为 "false" 隐藏)
+- `NEXT_PUBLIC_FILING_ICP`: ICP 备案号 (例如: 滇ICP备xxxxxxxx号)
+- `NEXT_PUBLIC_FILING_SECURITY`: 公安联网备案号 (例如: 滇公网安备xxxxxxxxxxxxxx号)
+
 ## 声明
 
 本项目由阿里云ESA提供加速、计算和保护
