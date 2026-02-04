@@ -641,10 +641,10 @@ export default function TwoFactorAuth() {
   }
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
+    <div className="min-h-screen flex flex-col relative">
       <TechBackground />
       {/* Header */}
-      <header className="border-b bg-card/50 backdrop-blur-sm sticky top-0 z-50">
+      <header className="border-b bg-background/80 backdrop-blur-sm sticky top-0 z-50">
         <div className="max-w-3xl mx-auto px-6 md:px-8 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -749,7 +749,7 @@ export default function TwoFactorAuth() {
       </header>
 
       {/* Main Content */}
-      <main className="flex-1 max-w-3xl mx-auto w-full px-6 md:px-8 py-6">
+      <main className="flex-1 max-w-3xl mx-auto w-full px-6 md:px-8 py-6 relative z-10">
         {/* Timer Progress */}
         <div className="mb-6">
           <div className="flex items-center justify-between mb-2">
@@ -1092,7 +1092,7 @@ export default function TwoFactorAuth() {
       </Dialog>
 
       {/* Footer */}
-      <footer className="border-t py-6 mt-auto">
+      <footer className="border-t py-6 mt-auto relative z-10 bg-background/80 backdrop-blur-sm">
         <div className="mx-auto flex max-w-4xl flex-col items-center gap-2 text-center md:flex-row md:justify-between md:gap-4 px-4">
           <p className="text-xs tracking-wider text-muted-foreground">© 2025 Simon. All rights reserved.</p>
           <div className="flex items-center gap-4 text-xs tracking-wider text-muted-foreground/60">

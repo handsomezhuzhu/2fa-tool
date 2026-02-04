@@ -111,7 +111,9 @@ export function TechBackground() {
     const animate = () => {
       const isDark = document.documentElement.classList.contains("dark")
       
-      ctx.clearRect(0, 0, canvas.width, canvas.height)
+      // Fill with base background color
+      ctx.fillStyle = isDark ? "hsl(224, 71%, 4%)" : "hsl(0, 0%, 100%)"
+      ctx.fillRect(0, 0, canvas.width, canvas.height)
 
       // Draw subtle gradient overlay
       const gradient = ctx.createRadialGradient(
@@ -165,7 +167,7 @@ export function TechBackground() {
   return (
     <canvas
       ref={canvasRef}
-      className="fixed inset-0 pointer-events-none -z-10"
+      className="fixed inset-0 pointer-events-none z-0"
       aria-hidden="true"
     />
   )
