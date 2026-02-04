@@ -798,7 +798,7 @@ export default function TwoFactorAuth() {
                   {t.addToken}
                 </Button>
               </DialogTrigger>
-              <DialogContent className="max-w-md max-h-[85vh] overflow-y-auto">
+              <DialogContent className="max-w-md">
                 <DialogHeader>
                   <DialogTitle>{t.addNewToken}</DialogTitle>
                   <DialogDescription>{t.addNewTokenDesc}</DialogDescription>
@@ -864,40 +864,42 @@ export default function TwoFactorAuth() {
 
                       {showAdvanced && (
                         <div className="mt-4 space-y-4">
-                          <div className="space-y-2">
-                            <Label>{t.algorithm}</Label>
-                            <Select
-                              value={newToken.algorithm}
-                              onValueChange={(value: "SHA1" | "SHA256" | "SHA512") =>
-                                setNewToken({ ...newToken, algorithm: value })
-                              }
-                            >
-                              <SelectTrigger>
-                                <SelectValue />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="SHA1">{t.algorithmDefault}</SelectItem>
-                                <SelectItem value="SHA256">SHA-256</SelectItem>
-                                <SelectItem value="SHA512">SHA-512</SelectItem>
-                              </SelectContent>
-                            </Select>
-                          </div>
-                          <div className="space-y-2">
-                            <Label>{t.digits}</Label>
-                            <Select
-                              value={newToken.digits.toString()}
-                              onValueChange={(value) =>
-                                setNewToken({ ...newToken, digits: Number.parseInt(value) as 6 | 8 })
-                              }
-                            >
-                              <SelectTrigger>
-                                <SelectValue />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="6">{t.digitsDefault}</SelectItem>
-                                <SelectItem value="8">{t.digits8}</SelectItem>
-                              </SelectContent>
-                            </Select>
+                          <div className="grid grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                              <Label>{t.algorithm}</Label>
+                              <Select
+                                value={newToken.algorithm}
+                                onValueChange={(value: "SHA1" | "SHA256" | "SHA512") =>
+                                  setNewToken({ ...newToken, algorithm: value })
+                                }
+                              >
+                                <SelectTrigger>
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="SHA1">{t.algorithmDefault}</SelectItem>
+                                  <SelectItem value="SHA256">SHA-256</SelectItem>
+                                  <SelectItem value="SHA512">SHA-512</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
+                            <div className="space-y-2">
+                              <Label>{t.digits}</Label>
+                              <Select
+                                value={newToken.digits.toString()}
+                                onValueChange={(value) =>
+                                  setNewToken({ ...newToken, digits: Number.parseInt(value) as 6 | 8 })
+                                }
+                              >
+                                <SelectTrigger>
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="6">{t.digitsDefault}</SelectItem>
+                                  <SelectItem value="8">{t.digits8}</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
                           </div>
                           <div className="space-y-2">
                             <Label>{t.period}</Label>
