@@ -90,9 +90,7 @@ const ToastClose = React.forwardRef<
     )}
     toast-close=""
     onClick={(e) => {
-      e.preventDefault()
       e.stopPropagation()
-      e.nativeEvent.stopImmediatePropagation()
       onClick?.(e)
     }}
     onPointerDown={(e) => {
