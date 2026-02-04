@@ -1,59 +1,81 @@
-# Frontend 2FA Tool
+# 2FA Authenticator / 两步验证器
 
-这是一个安全、离线优先的前端双因素认证 (2FA) 工具，基于 Next.js 构建。
+一个纯前端的 TOTP 两步验证工具，支持多种添加令牌方式，数据完全存储在本地浏览器中。
 
-## 功能特性
+A pure frontend TOTP two-factor authentication tool with multiple token import methods. All data is stored locally in your browser.
 
-- 🔒 **安全**: 所有数据存储在本地，不上传服务器
-- 📱 **QR 扫码**: 支持直接扫描 QR 码添加令牌 (使用 jsQR)
-- ⌨️ **手动录入**: 支持手动输入密钥添加
-- 🌓 **深色模式**: 内置明亮/深色主题切换
-- 📤 **导入/导出**: 支持令牌数据的备份与恢复
-- 🌐 **多语言**: 支持国际化
+## Features / 功能特性
 
-## 技术栈
+- **多种添加方式** - 手动输入密钥、扫描二维码、上传二维码图片
+- **高级设置** - 支持 SHA-1/256/512 算法、6/8位验证码、30/60秒刷新周期
+- **完整编辑** - 可编辑令牌的所有信息（名称、发行者、密钥、算法等）
+- **一键复制** - 点击验证码即可复制，带视觉反馈
+- **数据管理** - 支持导入/导出备份（JSON格式）
+- **去重检测** - 自动检测重复令牌
+- **主题切换** - 支持亮色/暗色/跟随系统三种主题
+- **多语言** - 支持中文/英文切换
+- **纯前端** - 无需后端，数据存储在浏览器 localStorage
+- **静态部署** - 支持导出为静态文件部署到任意平台
 
-- **框架**: Next.js 14
-- **UI 组件**: Radix UI
-- **样式**: Tailwind CSS
-- **工具库**: jsQR, date-fns
+## Tech Stack / 技术栈
 
-## 环境变量
+- Next.js 15
+- React 19
+- TypeScript
+- Tailwind CSS
+- shadcn/ui
+- jsQR (二维码识别)
 
-可以在部署时设置以下环境变量来配置页脚信息：
+## Environment Variables / 环境变量
 
-- `NEXT_PUBLIC_SHOW_FOOTER`: 是否显示页脚 (默认: true, 设置为 "false" 隐藏)
-- `NEXT_PUBLIC_FILING_ICP`: ICP 备案号 (例如: 滇ICP备xxxxxxxx号)
-- `NEXT_PUBLIC_FILING_SECURITY`: 公安联网备案号 (例如: 滇公网安备xxxxxxxxxxxxxx号)
+所有环境变量均为可选配置：
 
-## 声明
+| 变量名 | 说明 | 示例值 |
+|--------|------|--------|
+| `NEXT_PUBLIC_SHOW_FOOTER` | 是否显示页脚（默认隐藏） | `true` |
+| `NEXT_PUBLIC_FOOTER_COPYRIGHT` | 版权所有者名称 | `Your Name` |
+| `NEXT_PUBLIC_ICP_NUMBER` | ICP备案号（完整文本） | `京ICP备xxxxxxxx号` |
+| `NEXT_PUBLIC_PSB_NUMBER` | 公安备案号（完整文本） | `京公网安备xxxxxxxxxxxxxx号` |
 
-本项目由阿里云ESA提供加速、计算和保护
+## Deployment / 部署
 
-![阿里云ESA Pages](public/images/aliyun-esa.png)
+### Vercel
 
-## 开始使用
+直接导入 GitHub 仓库即可，无需额外配置。
 
-1. 安装依赖:
+### 静态部署（阿里云 ESA / Cloudflare Pages 等）
 
-```bash
-pnpm install
+项目已配置为静态导出模式，构建后会生成 `out` 目录。
+
+**构建配置：**
+
+```
+安装命令：npm install
+构建命令：npm run build
+静态资源目录：out
+Node.js 版本：20.x 或 22.x
 ```
 
-2. 启动开发服务器:
+### 本地开发
 
 ```bash
-pnpm dev
+# 安装依赖
+npm install
+
+# 启动开发服务器
+npm run dev
+
+# 构建
+npm run build
 ```
 
-3. 访问 [http://localhost:3000](http://localhost:3000)
+## Security / 安全说明
 
-## 构建
+- 所有令牌数据仅存储在浏览器本地 localStorage 中
+- 不会向任何服务器发送数据
+- 建议定期导出备份以防数据丢失
+- 导出的 JSON 文件包含敏感密钥信息，请妥善保管
 
-```bash
-pnpm build
-```
+## License / 许可证
 
-## 部署
-
-本项目可以直接部署在阿里云 ESA Pages 上。
+MIT

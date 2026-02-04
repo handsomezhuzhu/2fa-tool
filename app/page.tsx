@@ -27,7 +27,6 @@ import {
   Monitor,
   Languages,
   Check,
-  Github,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -51,6 +50,7 @@ import { Toaster } from "@/components/ui/toaster"
 import { useToast } from "@/hooks/use-toast"
 import { useTheme } from "@/components/theme-provider"
 import { useLanguage } from "@/lib/i18n"
+import { TechBackground } from "@/components/tech-background"
 
 interface TOTPToken {
   id: string
@@ -163,7 +163,6 @@ export default function TwoFactorAuth() {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false)
   const [editingToken, setEditingToken] = useState<TOTPToken | null>(null)
   const [showAdvanced, setShowAdvanced] = useState(false)
-  const [mounted, setMounted] = useState(false)
   const videoRef = useRef<HTMLVideoElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -197,7 +196,6 @@ export default function TwoFactorAuth() {
     if (savedSettings) {
       setSettings(JSON.parse(savedSettings))
     }
-    setMounted(true)
   }, [])
 
   // Save tokens to localStorage
@@ -643,9 +641,10 @@ export default function TwoFactorAuth() {
   }
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
+    <div className="min-h-screen flex flex-col relative">
+      <TechBackground />
       {/* Header */}
-      <header className="border-b bg-card/50 backdrop-blur-sm sticky top-0 z-50">
+      <header className="border-b bg-background/80 backdrop-blur-sm sticky top-0 z-50">
         <div className="max-w-3xl mx-auto px-6 md:px-8 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -658,33 +657,15 @@ export default function TwoFactorAuth() {
               </div>
             </div>
             <div className="flex items-center gap-2">
-              <Button variant="ghost" size="icon" asChild>
-                <a
-                  href="https://github.com/handsomezhuzhu/2fa-tool"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  title="GitHub"
-                >
-                  <Github className="h-5 w-5" />
-                  <span className="sr-only">GitHub</span>
-                </a>
-              </Button>
-
               <Button
                 variant="ghost"
                 size="icon"
                 onClick={cycleTheme}
-                title={mounted ? (theme === "light" ? t.themeLight : theme === "dark" ? t.themeDark : t.themeSystem) : t.themeSystem}
+                title={theme === "light" ? t.themeLight : theme === "dark" ? t.themeDark : t.themeSystem}
               >
-                {!mounted ? (
-                  <Monitor className="h-5 w-5" />
-                ) : (
-                  <>
-                    {theme === "light" && <Sun className="h-5 w-5" />}
-                    {theme === "dark" && <Moon className="h-5 w-5" />}
-                    {theme === "system" && <Monitor className="h-5 w-5" />}
-                  </>
-                )}
+                {theme === "light" && <Sun className="h-5 w-5" />}
+                {theme === "dark" && <Moon className="h-5 w-5" />}
+                {theme === "system" && <Monitor className="h-5 w-5" />}
                 <span className="sr-only">Toggle theme</span>
               </Button>
 
@@ -768,7 +749,7 @@ export default function TwoFactorAuth() {
       </header>
 
       {/* Main Content */}
-      <main className="flex-1 max-w-3xl mx-auto w-full px-6 md:px-8 py-6">
+      <main className="flex-1 max-w-3xl mx-auto w-full px-6 md:px-8 py-6 relative z-10">
         {/* Timer Progress */}
         <div className="mb-6">
           <div className="flex items-center justify-between mb-2">
@@ -1017,7 +998,7 @@ export default function TwoFactorAuth() {
 
       {/* Edit Dialog */}
       <Dialog open={!!editingToken} onOpenChange={(open) => !open && setEditingToken(null)}>
-        <DialogContent>
+        <DialogContent className="max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>{t.editToken}</DialogTitle>
           </DialogHeader>
@@ -1037,6 +1018,68 @@ export default function TwoFactorAuth() {
                   onChange={(e) => setEditingToken({ ...editingToken, issuer: e.target.value })}
                 />
               </div>
+              <div className="space-y-2">
+                <Label>{t.secretKey}</Label>
+                <Input
+                  value={editingToken.secret}
+                  onChange={(e) => setEditingToken({ ...editingToken, secret: e.target.value.toUpperCase().replace(/\s/g, "") })}
+                  className="font-mono"
+                />
+              </div>
+              <div className="grid grid-cols-3 gap-4">
+                <div className="space-y-2">
+                  <Label>{t.algorithm}</Label>
+                  <Select
+                    value={editingToken.algorithm}
+                    onValueChange={(value: "SHA1" | "SHA256" | "SHA512") =>
+                      setEditingToken({ ...editingToken, algorithm: value })
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="SHA1">SHA-1</SelectItem>
+                      <SelectItem value="SHA256">SHA-256</SelectItem>
+                      <SelectItem value="SHA512">SHA-512</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label>{t.digits}</Label>
+                  <Select
+                    value={editingToken.digits.toString()}
+                    onValueChange={(value) =>
+                      setEditingToken({ ...editingToken, digits: parseInt(value) as 6 | 8 })
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="6">6</SelectItem>
+                      <SelectItem value="8">8</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label>{t.period}</Label>
+                  <Select
+                    value={editingToken.period.toString()}
+                    onValueChange={(value) =>
+                      setEditingToken({ ...editingToken, period: parseInt(value) })
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="30">30s</SelectItem>
+                      <SelectItem value="60">60s</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
             </div>
           )}
           <DialogFooter>
@@ -1049,47 +1092,46 @@ export default function TwoFactorAuth() {
       </Dialog>
 
       {/* Footer */}
-      {/* Footer */}
-      {(process.env.NEXT_PUBLIC_SHOW_FOOTER !== "false") && (
-        <footer className="border-t py-6 mt-auto">
+      {process.env.NEXT_PUBLIC_SHOW_FOOTER === "true" && (
+        <footer className="border-t py-6 mt-auto relative z-10 bg-background/80 backdrop-blur-sm">
           <div className="mx-auto flex max-w-4xl flex-col items-center gap-2 text-center md:flex-row md:justify-between md:gap-4 px-4">
-            <p className="text-xs tracking-wider text-muted-foreground">© 2025 Simon. All rights reserved.</p>
-            {(process.env.NEXT_PUBLIC_FILING_ICP || process.env.NEXT_PUBLIC_FILING_SECURITY) && (
-              <div className="flex items-center gap-4 text-xs tracking-wider text-muted-foreground/60">
-                {process.env.NEXT_PUBLIC_FILING_ICP && (
-                  <a
-                    href="https://beian.miit.gov.cn/"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="transition-colors hover:text-muted-foreground"
-                  >
-                    {process.env.NEXT_PUBLIC_FILING_ICP}
-                  </a>
-                )}
-                {process.env.NEXT_PUBLIC_FILING_ICP && process.env.NEXT_PUBLIC_FILING_SECURITY && (
-                  <span className="text-muted-foreground/30">|</span>
-                )}
-                {process.env.NEXT_PUBLIC_FILING_SECURITY && (
-                  <a
-                    href="https://beian.mps.gov.cn"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-1.5 transition-colors hover:text-muted-foreground"
-                  >
-                    <img
-                      alt="公安备案"
-                      loading="lazy"
-                      width="14"
-                      height="14"
-                      decoding="async"
-                      className="opacity-60"
-                      src="/images/beian.png"
-                    />
-                    {process.env.NEXT_PUBLIC_FILING_SECURITY}
-                  </a>
-                )}
-              </div>
-            )}
+            <p className="text-xs tracking-wider text-muted-foreground">
+              © {new Date().getFullYear()} {process.env.NEXT_PUBLIC_FOOTER_COPYRIGHT || ""}. All rights reserved.
+            </p>
+            <div className="flex items-center gap-4 text-xs tracking-wider text-muted-foreground/60">
+              {process.env.NEXT_PUBLIC_ICP_NUMBER && (
+                <a
+                  href="https://beian.miit.gov.cn/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="transition-colors hover:text-muted-foreground"
+                >
+                  {process.env.NEXT_PUBLIC_ICP_NUMBER}
+                </a>
+              )}
+              {process.env.NEXT_PUBLIC_ICP_NUMBER && process.env.NEXT_PUBLIC_PSB_NUMBER && (
+                <span className="text-muted-foreground/30">|</span>
+              )}
+              {process.env.NEXT_PUBLIC_PSB_NUMBER && (
+                <a
+                  href="https://beian.mps.gov.cn"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-1.5 transition-colors hover:text-muted-foreground"
+                >
+                  <img
+                    alt="公安备案"
+                    loading="lazy"
+                    width="14"
+                    height="14"
+                    decoding="async"
+                    className="opacity-60"
+                    src="/images/beian.png"
+                  />
+                  {process.env.NEXT_PUBLIC_PSB_NUMBER}
+                </a>
+              )}
+            </div>
           </div>
         </footer>
       )}
@@ -1168,8 +1210,9 @@ function TokenCard({ token, code, timeLeft, showCode, onCopy, onEdit, onDelete, 
             </button>
 
             <span
-              className={`font-mono text-base font-bold min-w-[90px] text-center transition-colors ${copied ? "text-green-500" : ""
-                }`}
+              className={`font-mono text-base font-bold min-w-[90px] text-center transition-colors ${
+                copied ? "text-green-500" : ""
+              }`}
             >
               {visible ? formattedCode : "••• •••"}
             </span>
