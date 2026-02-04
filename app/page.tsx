@@ -1092,39 +1092,41 @@ export default function TwoFactorAuth() {
       </Dialog>
 
       {/* Footer */}
-      <footer className="border-t py-6 mt-auto relative z-10 bg-background/80 backdrop-blur-sm">
-        <div className="mx-auto flex max-w-4xl flex-col items-center gap-2 text-center md:flex-row md:justify-between md:gap-4 px-4">
-          <p className="text-xs tracking-wider text-muted-foreground">© 2025 Simon. All rights reserved.</p>
-          <div className="flex items-center gap-4 text-xs tracking-wider text-muted-foreground/60">
-            <a
-              href="https://beian.miit.gov.cn/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="transition-colors hover:text-muted-foreground"
-            >
-              滇ICP备2025074424号
-            </a>
-            <span className="text-muted-foreground/30">|</span>
-            <a
-              href="https://beian.mps.gov.cn"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-1.5 transition-colors hover:text-muted-foreground"
-            >
-              <img
-                alt="公安备案"
-                loading="lazy"
-                width="14"
-                height="14"
-                decoding="async"
-                className="opacity-60"
-                src="/images/beian.png"
-              />
-              滇公网安备53250402000233号
-            </a>
+      {process.env.NEXT_PUBLIC_SHOW_FOOTER === "true" && (
+        <footer className="border-t py-6 mt-auto relative z-10 bg-background/80 backdrop-blur-sm">
+          <div className="mx-auto flex max-w-4xl flex-col items-center gap-2 text-center md:flex-row md:justify-between md:gap-4 px-4">
+            <p className="text-xs tracking-wider text-muted-foreground">© 2025 Simon. All rights reserved.</p>
+            <div className="flex items-center gap-4 text-xs tracking-wider text-muted-foreground/60">
+              <a
+                href="https://beian.miit.gov.cn/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="transition-colors hover:text-muted-foreground"
+              >
+                滇ICP备2025074424号
+              </a>
+              <span className="text-muted-foreground/30">|</span>
+              <a
+                href="https://beian.mps.gov.cn"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-1.5 transition-colors hover:text-muted-foreground"
+              >
+                <img
+                  alt="公安备案"
+                  loading="lazy"
+                  width="14"
+                  height="14"
+                  decoding="async"
+                  className="opacity-60"
+                  src="/images/beian.png"
+                />
+                滇公网安备53250402000233号
+              </a>
+            </div>
           </div>
-        </div>
-      </footer>
+        </footer>
+      )}
 
       <Toaster />
     </div>
