@@ -27,6 +27,7 @@ import {
   Monitor,
   Languages,
   Check,
+  Github,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -660,6 +661,22 @@ export default function TwoFactorAuth() {
               <Button
                 variant="ghost"
                 size="icon"
+                asChild
+              >
+                <a
+                  href="https://github.com/handsomezhuzhu/2fa-tool"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  title="GitHub"
+                >
+                  <Github className="h-5 w-5" />
+                  <span className="sr-only">GitHub</span>
+                </a>
+              </Button>
+
+              <Button
+                variant="ghost"
+                size="icon"
                 onClick={cycleTheme}
                 title={theme === "light" ? t.themeLight : theme === "dark" ? t.themeDark : t.themeSystem}
               >
@@ -847,40 +864,42 @@ export default function TwoFactorAuth() {
 
                       {showAdvanced && (
                         <div className="mt-4 space-y-4">
-                          <div className="space-y-2">
-                            <Label>{t.algorithm}</Label>
-                            <Select
-                              value={newToken.algorithm}
-                              onValueChange={(value: "SHA1" | "SHA256" | "SHA512") =>
-                                setNewToken({ ...newToken, algorithm: value })
-                              }
-                            >
-                              <SelectTrigger>
-                                <SelectValue />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="SHA1">{t.algorithmDefault}</SelectItem>
-                                <SelectItem value="SHA256">SHA-256</SelectItem>
-                                <SelectItem value="SHA512">SHA-512</SelectItem>
-                              </SelectContent>
-                            </Select>
-                          </div>
-                          <div className="space-y-2">
-                            <Label>{t.digits}</Label>
-                            <Select
-                              value={newToken.digits.toString()}
-                              onValueChange={(value) =>
-                                setNewToken({ ...newToken, digits: Number.parseInt(value) as 6 | 8 })
-                              }
-                            >
-                              <SelectTrigger>
-                                <SelectValue />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="6">{t.digitsDefault}</SelectItem>
-                                <SelectItem value="8">{t.digits8}</SelectItem>
-                              </SelectContent>
-                            </Select>
+                          <div className="grid grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                              <Label>{t.algorithm}</Label>
+                              <Select
+                                value={newToken.algorithm}
+                                onValueChange={(value: "SHA1" | "SHA256" | "SHA512") =>
+                                  setNewToken({ ...newToken, algorithm: value })
+                                }
+                              >
+                                <SelectTrigger>
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="SHA1">{t.algorithmDefault}</SelectItem>
+                                  <SelectItem value="SHA256">SHA-256</SelectItem>
+                                  <SelectItem value="SHA512">SHA-512</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
+                            <div className="space-y-2">
+                              <Label>{t.digits}</Label>
+                              <Select
+                                value={newToken.digits.toString()}
+                                onValueChange={(value) =>
+                                  setNewToken({ ...newToken, digits: Number.parseInt(value) as 6 | 8 })
+                                }
+                              >
+                                <SelectTrigger>
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="6">{t.digitsDefault}</SelectItem>
+                                  <SelectItem value="8">{t.digits8}</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
                           </div>
                           <div className="space-y-2">
                             <Label>{t.period}</Label>
@@ -1237,7 +1256,7 @@ function TokenCard({ token, code, timeLeft, showCode, onCopy, onEdit, onDelete, 
                   <Edit2 className="h-4 w-4 mr-2" />
                   {t.edit}
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={onDelete} className="text-destructive">
+                <DropdownMenuItem onClick={onDelete} className="text-red-500 focus:text-red-500 focus:bg-red-500/10">
                   <Trash2 className="h-4 w-4 mr-2" />
                   {t.delete}
                 </DropdownMenuItem>
