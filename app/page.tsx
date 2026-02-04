@@ -1254,7 +1254,7 @@ function TokenCard({ token, code, timeLeft, showCode, onCopy, onEdit, onDelete, 
                   <Edit2 className="h-4 w-4 mr-2" />
                   {t.edit}
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={onDelete} className="text-destructive">
+                <DropdownMenuItem onClick={onDelete} className="text-red-500 focus:text-red-500 focus:bg-red-500/10">
                   <Trash2 className="h-4 w-4 mr-2" />
                   {t.delete}
                 </DropdownMenuItem>
