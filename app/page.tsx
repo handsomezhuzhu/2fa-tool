@@ -798,7 +798,7 @@ export default function TwoFactorAuth() {
                   {t.addToken}
                 </Button>
               </DialogTrigger>
-              <DialogContent className="max-w-md">
+              <DialogContent className="max-w-md max-h-[85vh] overflow-y-auto">
                 <DialogHeader>
                   <DialogTitle>{t.addNewToken}</DialogTitle>
                   <DialogDescription>{t.addNewTokenDesc}</DialogDescription>
