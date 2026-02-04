@@ -50,6 +50,7 @@ import { Toaster } from "@/components/ui/toaster"
 import { useToast } from "@/hooks/use-toast"
 import { useTheme } from "@/components/theme-provider"
 import { useLanguage } from "@/lib/i18n"
+import { TechBackground } from "@/components/tech-background"
 
 interface TOTPToken {
   id: string
@@ -641,6 +642,7 @@ export default function TwoFactorAuth() {
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
+      <TechBackground />
       {/* Header */}
       <header className="border-b bg-card/50 backdrop-blur-sm sticky top-0 z-50">
         <div className="max-w-3xl mx-auto px-6 md:px-8 py-4">
