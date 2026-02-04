@@ -33,9 +33,9 @@ A pure frontend TOTP two-factor authentication tool with multiple token import m
 | 变量名 | 说明 | 示例值 |
 |--------|------|--------|
 | `NEXT_PUBLIC_SHOW_FOOTER` | 是否显示页脚（默认隐藏） | `true` |
-| `NEXT_PUBLIC_FOOTER_COPYRIGHT` | 版权所有者名称 | `Simon` |
-| `NEXT_PUBLIC_ICP_NUMBER` | ICP备案号（完整文本） | `滇ICP备2025074424号` |
-| `NEXT_PUBLIC_PSB_NUMBER` | 公安备案号（完整文本） | `滇公网安备53250402000233号` |
+| `NEXT_PUBLIC_FOOTER_COPYRIGHT` | 版权所有者名称 | `Your Name` |
+| `NEXT_PUBLIC_ICP_NUMBER` | ICP备案号（完整文本） | `京ICP备xxxxxxxx号` |
+| `NEXT_PUBLIC_PSB_NUMBER` | 公安备案号（完整文本） | `京公网安备xxxxxxxxxxxxxx号` |
 
 ## Deployment / 部署
 
