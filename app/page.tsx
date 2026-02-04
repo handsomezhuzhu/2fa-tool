@@ -27,6 +27,7 @@ import {
   Monitor,
   Languages,
   Check,
+  Github,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -657,6 +658,22 @@ export default function TwoFactorAuth() {
               </div>
             </div>
             <div className="flex items-center gap-2">
+              <Button
+                variant="ghost"
+                size="icon"
+                asChild
+              >
+                <a
+                  href="https://github.com/handsomezhuzhu/2fa-tool"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  title="GitHub"
+                >
+                  <Github className="h-5 w-5" />
+                  <span className="sr-only">GitHub</span>
+                </a>
+              </Button>
+
               <Button
                 variant="ghost"
                 size="icon"
