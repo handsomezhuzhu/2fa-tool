@@ -49,16 +49,16 @@ A pure frontend TOTP two-factor authentication tool with multiple token import m
 
 **构建配置：**
 
-```
+\`\`\`
 安装命令：npm install
 构建命令：npm run build
 静态资源目录：out
 Node.js 版本：20.x 或 22.x
-```
+\`\`\`
 
 ### 本地开发
 
-```bash
+\`\`\`bash
 # 安装依赖
 npm install
 
@@ -67,7 +67,7 @@ npm run dev
 
 # 构建
 npm run build
-```
+\`\`\`
 
 ## Security / 安全说明
 

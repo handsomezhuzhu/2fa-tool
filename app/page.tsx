@@ -3,7 +3,7 @@
 import type React from "react"
 
 import { useState, useEffect, useRef, useCallback } from "react"
-import jsQR from "jsqr"
+import type jsQRType from "jsqr"
 import {
   Plus,
   Camera,
@@ -450,7 +450,7 @@ export default function TwoFactorAuth() {
 
     if (!ctx) return
 
-    const scan = () => {
+    const scan = async () => {
       if (!streamRef.current) return
 
       if (video.readyState === video.HAVE_ENOUGH_DATA) {
@@ -459,6 +459,7 @@ export default function TwoFactorAuth() {
         ctx.drawImage(video, 0, 0, canvas.width, canvas.height)
 
         const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height)
+        const jsQR = (await import("jsqr")).default
         const code = jsQR(imageData.data, imageData.width, imageData.height, {
           inversionAttempts: "dontInvert",
         })
@@ -494,7 +495,7 @@ export default function TwoFactorAuth() {
 
     const img = new Image()
     img.crossOrigin = "anonymous"
-    img.onload = () => {
+    img.onload = async () => {
       const canvas = document.createElement("canvas")
       canvas.width = img.width
       canvas.height = img.height
@@ -503,6 +504,7 @@ export default function TwoFactorAuth() {
 
       ctx.drawImage(img, 0, 0)
       const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height)
+      const jsQR = (await import("jsqr")).default
       const code = jsQR(imageData.data, imageData.width, imageData.height, {
         inversionAttempts: "attemptBoth",
       })
