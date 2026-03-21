@@ -162,7 +162,11 @@ export default function TwoFactorAuth() {
   const [isCameraOpen, setIsCameraOpen] = useState(false)
   const [isSettingsOpen, setIsSettingsOpen] = useState(false)
   const [editingToken, setEditingToken] = useState<TOTPToken | null>(null)
-  const [showAdvanced, setShowAdvanced] = useState(false)
+  const [showExportPassword, setShowExportPassword] = useState(false)
+  const [exportPassword, setExportPassword] = useState("")
+  const [importPassword, setImportPassword] = useState("")
+  const [showImportPassword, setShowImportPassword] = useState(false)
+  const [importFile, setImportFile] = useState<File | null>(null)
   const videoRef = useRef<HTMLVideoElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -560,47 +564,74 @@ export default function TwoFactorAuth() {
     }
   }
 
-  // Export tokens
-  const exportTokens = () => {
-    const data = JSON.stringify(tokens, null, 2)
-    const blob = new Blob([data], { type: "application/json" })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement("a")
-    a.href = url
-    a.download = "2fa-tokens-backup.json"
-    a.click()
-    URL.revokeObjectURL(url)
-    toast({
-      title: t.exportSuccess,
-      description: t.exportedJson,
-    })
+  // Export tokens with password encryption
+  const exportTokens = async () => {
+    try {
+      const data = JSON.stringify(tokens)
+      
+      // Dynamic import of crypto-js
+      const CryptoJS = (await import("crypto-js")).default
+      
+      // Encrypt the data with password
+      const encrypted = CryptoJS.AES.encrypt(data, exportPassword).toString()
+      
+      // Create blob and download
+      const blob = new Blob([encrypted], { type: "application/octet-stream" })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement("a")
+      a.href = url
+      a.download = "2fa-tokens-backup.enc"
+      a.click()
+      URL.revokeObjectURL(url)
+      
+      setExportPassword("")
+      setShowExportPassword(false)
+      toast({
+        title: t.exportSuccess,
+        description: t.exportedJson,
+      })
+    } catch {
+      toast({
+        title: t.error,
+        description: "Failed to export backup",
+        variant: "destructive",
+      })
+    }
   }
 
-  // Import tokens
-  const importTokens = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0]
-    if (!file) return
-
-    const reader = new FileReader()
-    reader.onload = (e) => {
-      try {
-        const imported = JSON.parse(e.target?.result as string)
-        if (Array.isArray(imported)) {
-          setTokens([...tokens, ...imported])
-          toast({
-            title: t.importSuccess,
-            description: `${t.added} ${imported.length} ${t.importedTokens}`,
-          })
-        }
-      } catch {
+  // Import tokens with password decryption
+  const importTokens = async (file: File) => {
+    try {
+      const encryptedData = await file.text()
+      const CryptoJS = (await import("crypto-js")).default
+      
+      // Decrypt the data with password
+      const decrypted = CryptoJS.AES.decrypt(encryptedData, importPassword).toString(
+        CryptoJS.enc.Utf8
+      )
+      
+      if (!decrypted) {
+        throw new Error("Invalid password")
+      }
+      
+      const imported = JSON.parse(decrypted)
+      if (Array.isArray(imported)) {
+        setTokens([...tokens, ...imported])
+        setImportPassword("")
+        setImportFile(null)
+        setShowImportPassword(false)
         toast({
-          title: t.importFailed,
-          description: t.invalidFormat,
-          variant: "destructive",
+          title: t.importSuccess,
+          description: `${t.added} ${imported.length} ${t.importedTokens}`,
         })
       }
+    } catch {
+      toast({
+        title: t.importFailed,
+        description: "Invalid password or corrupted file",
+        variant: "destructive",
+      })
     }
-    reader.readAsText(file)
   }
 
   // Filter and sort tokens
@@ -745,17 +776,14 @@ export default function TwoFactorAuth() {
                     <div className="border-t pt-4 space-y-3">
                       <Label>{t.dataManagement}</Label>
                       <div className="flex gap-2">
-                        <Button variant="outline" size="sm" onClick={exportTokens}>
-                          <Download className="h-4 w-4 mr-2" />
-                          {t.exportBackup}
-                        </Button>
-                        <Button variant="outline" size="sm" asChild>
-                          <label>
-                            <Upload className="h-4 w-4 mr-2" />
-                            {t.importBackup}
-                            <input type="file" accept=".json" className="hidden" onChange={importTokens} />
-                          </label>
-                        </Button>
+                  <Button variant="outline" size="sm" onClick={() => setShowExportPassword(true)}>
+                    <Download className="h-4 w-4 mr-2" />
+                    {t.exportBackup}
+                  </Button>
+                  <Button variant="outline" size="sm" onClick={() => setShowImportPassword(true)}>
+                    <Upload className="h-4 w-4 mr-2" />
+                    {t.importBackup}
+                  </Button>
                       </div>
                     </div>
                   </div>
@@ -1155,6 +1183,96 @@ export default function TwoFactorAuth() {
           </div>
         </footer>
       )}
+
+      {/* Export Password Dialog */}
+      <Dialog open={showExportPassword} onOpenChange={setShowExportPassword}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Set Export Password</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Password</Label>
+              <Input
+                type="password"
+                placeholder="Enter a password to protect your backup"
+                value={exportPassword}
+                onChange={(e) => setExportPassword(e.target.value)}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowExportPassword(false)}>
+              {t.cancel}
+            </Button>
+            <Button 
+              onClick={exportTokens}
+              disabled={!exportPassword}
+            >
+              <Download className="h-4 w-4 mr-2" />
+              {t.exportBackup}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Import Password Dialog */}
+      <Dialog open={showImportPassword} onOpenChange={(open) => {
+        if (!open) {
+          setShowImportPassword(false)
+          setImportFile(null)
+          setImportPassword("")
+        } else {
+          setShowImportPassword(true)
+        }
+      }}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Import Backup</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Select File</Label>
+              <Input
+                type="file"
+                accept=".enc"
+                onChange={(e) => {
+                  setImportFile(e.target.files?.[0] || null)
+                }}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Password</Label>
+              <Input
+                type="password"
+                placeholder="Enter the password for this backup"
+                value={importPassword}
+                onChange={(e) => setImportPassword(e.target.value)}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => {
+              setShowImportPassword(false)
+              setImportFile(null)
+              setImportPassword("")
+            }}>
+              {t.cancel}
+            </Button>
+            <Button 
+              onClick={() => {
+                if (importFile) {
+                  importTokens(importFile)
+                }
+              }}
+              disabled={!importPassword || !importFile}
+            >
+              <Upload className="h-4 w-4 mr-2" />
+              {t.importBackup}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <Toaster />
     </div>
