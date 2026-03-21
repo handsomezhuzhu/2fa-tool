@@ -116,6 +116,10 @@ const translations = {
     imageLoadFailed: "图片加载失败",
     duplicateToken: "令牌已存在",
     duplicateTokenDesc: "该密钥的令牌已添加过",
+    setExportPassword: "设置导出密码",
+    passwordPlaceholder: "输入密码以保护您的备份",
+    selectFile: "选择文件",
+    passwordInput: "输入备份密码",
   },
   en: {
     // Header
@@ -227,6 +231,10 @@ const translations = {
     imageLoadFailed: "Failed to load image",
     duplicateToken: "Token already exists",
     duplicateTokenDesc: "A token with this secret key has already been added",
+    setExportPassword: "Set Export Password",
+    passwordPlaceholder: "Enter a password to protect your backup",
+    selectFile: "Select File",
+    passwordInput: "Enter backup password",
   },
 }
 
