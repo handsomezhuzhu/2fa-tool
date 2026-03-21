@@ -617,13 +617,20 @@ export default function TwoFactorAuth() {
       
       const imported = JSON.parse(decrypted)
       if (Array.isArray(imported)) {
-        setTokens([...tokens, ...imported])
+        const existingSecrets = new Set(tokens.map((tk) => tk.secret.toUpperCase()))
+        const newTokens = (imported as TOTPToken[]).filter(
+          (tk) => !existingSecrets.has(tk.secret.toUpperCase())
+        )
+        const skipped = imported.length - newTokens.length
+        setTokens((prev) => [...prev, ...newTokens])
         setImportPassword("")
         setImportFile(null)
         setShowImportPassword(false)
         toast({
           title: t.importSuccess,
-          description: `${t.added} ${imported.length} ${t.importedTokens}`,
+          description: skipped > 0
+            ? `${t.added} ${newTokens.length} ${t.importedTokens}，已跳过 ${skipped} 个重复令牌`
+            : `${t.added} ${newTokens.length} ${t.importedTokens}`,
         })
       }
     } catch {
