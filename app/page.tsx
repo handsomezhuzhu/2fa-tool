@@ -162,6 +162,7 @@ export default function TwoFactorAuth() {
   const [isCameraOpen, setIsCameraOpen] = useState(false)
   const [isSettingsOpen, setIsSettingsOpen] = useState(false)
   const [editingToken, setEditingToken] = useState<TOTPToken | null>(null)
+  const [showAdvanced, setShowAdvanced] = useState(false)
   const [showExportPassword, setShowExportPassword] = useState(false)
   const [exportPassword, setExportPassword] = useState("")
   const [importPassword, setImportPassword] = useState("")
