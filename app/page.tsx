@@ -617,13 +617,20 @@ export default function TwoFactorAuth() {
       
       const imported = JSON.parse(decrypted)
       if (Array.isArray(imported)) {
-        setTokens([...tokens, ...imported])
+        const existingSecrets = new Set(tokens.map((tk) => tk.secret.toUpperCase()))
+        const newTokens = (imported as TOTPToken[]).filter(
+          (tk) => !existingSecrets.has(tk.secret.toUpperCase())
+        )
+        const skipped = imported.length - newTokens.length
+        setTokens((prev) => [...prev, ...newTokens])
         setImportPassword("")
         setImportFile(null)
         setShowImportPassword(false)
         toast({
           title: t.importSuccess,
-          description: `${t.added} ${imported.length} ${t.importedTokens}`,
+          description: skipped > 0
+            ? `${t.added} ${newTokens.length} ${t.importedTokens}，已跳过 ${skipped} 个重复令牌`
+            : `${t.added} ${newTokens.length} ${t.importedTokens}`,
         })
       }
     } catch {
@@ -1189,14 +1196,14 @@ export default function TwoFactorAuth() {
       <Dialog open={showExportPassword} onOpenChange={setShowExportPassword}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Set Export Password</DialogTitle>
+            <DialogTitle>{t.setExportPassword}</DialogTitle>
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div className="space-y-2">
               <Label>Password</Label>
               <Input
                 type="password"
-                placeholder="Enter a password to protect your backup"
+                placeholder={t.passwordPlaceholder}
                 value={exportPassword}
                 onChange={(e) => setExportPassword(e.target.value)}
               />
@@ -1229,11 +1236,11 @@ export default function TwoFactorAuth() {
       }}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Import Backup</DialogTitle>
+            <DialogTitle>{t.importBackup}</DialogTitle>
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div className="space-y-2">
-              <Label>Select File</Label>
+              <Label>{t.selectFile}</Label>
               <Input
                 type="file"
                 accept=".enc"
@@ -1246,7 +1253,7 @@ export default function TwoFactorAuth() {
               <Label>Password</Label>
               <Input
                 type="password"
-                placeholder="Enter the password for this backup"
+                placeholder={t.passwordInput}
                 value={importPassword}
                 onChange={(e) => setImportPassword(e.target.value)}
               />
